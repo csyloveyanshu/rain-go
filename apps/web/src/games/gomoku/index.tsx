@@ -1,5 +1,5 @@
 import { COLUMNS, toGtp, type GomokuView } from "@rain-go/engine";
-import { Bead, DropDefs, LastMark } from "../../components/drops";
+import { Bead, LastMark } from "../../components/drops";
 import { usePlacement } from "../../hooks/usePlacement";
 import type { BoardProps, GameUI } from "../types";
 
@@ -39,7 +39,6 @@ function Board({ view: s, canAct, send, toast }: BoardProps<GomokuView>) {
       role="grid"
       aria-label="五子棋棋盘"
     >
-      <DropDefs />
       <rect x={-PAD + 0.25} y={-PAD + 0.25} width={n - 1 + PAD * 2 - 0.5} height={n - 1 + PAD * 2 - 0.5} rx={0.55} fill="rgb(255 255 255 / 0.26)" stroke="rgb(255 255 255 / 0.6)" strokeWidth={0.025} />
       <g stroke="rgb(20 20 20 / 0.42)" strokeWidth={0.028}>
         {Array.from({ length: n }, (_, i) => (
@@ -64,12 +63,12 @@ function Board({ view: s, canAct, send, toast }: BoardProps<GomokuView>) {
           </g>
         ))}
       </g>
-      <g filter="url(#drop-shadow)">
+      <g>
         {s.cells.map((c, p) =>
-          c ? <Bead key={p} x={p % n} y={Math.floor(p / n)} dark={c === 1} className={p === s.last ? "drop-in" : undefined} /> : null,
+          c ? <Bead key={p} x={p % n} y={Math.floor(p / n)} dark={c === 1} standalone /> : null,
         )}
       </g>
-      {s.last !== undefined && <LastMark x={s.last % n} y={Math.floor(s.last / n)} dark={s.cells[s.last] === 1} k={s.moves} />}
+      {s.last !== undefined && <LastMark x={s.last % n} y={Math.floor(s.last / n)} dark={s.cells[s.last] === 1} k={s.moves} ripple={false} />}
       {win && (
         <line
           x1={win[0]!.x}
@@ -83,7 +82,7 @@ function Board({ view: s, canAct, send, toast }: BoardProps<GomokuView>) {
         />
       )}
       {place.preview !== null && !s.cells[place.preview] && (
-        <Bead x={place.preview % n} y={Math.floor(place.preview / n)} dark={humanDark} opacity={place.armed !== null ? 0.72 : 0.38} />
+        <Bead x={place.preview % n} y={Math.floor(place.preview / n)} dark={humanDark} opacity={place.armed !== null ? 0.72 : 0.38} standalone />
       )}
     </svg>
   );
