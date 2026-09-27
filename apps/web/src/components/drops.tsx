@@ -61,6 +61,7 @@ export function Bead({
   dark,
   className,
   opacity,
+  standalone = false,
 }: {
   x: number;
   y: number;
@@ -68,7 +69,31 @@ export function Bead({
   dark: boolean;
   className?: string;
   opacity?: number;
+  /**
+   * Draw the drop without url(#...) paints or SVG filters. This layered version
+   * is intentionally conservative for mobile WebKit, where duplicate SVG ids
+   * and animated filtered groups can occasionally make the painted body vanish.
+   */
+  standalone?: boolean;
 }) {
+  if (standalone) {
+    const edge = dark ? "#000" : "#c9c9c4";
+    const body = dark ? "#090909" : "#ecece8";
+    const crown = dark ? "#303030" : "#fff";
+
+    return (
+      <g className={className} opacity={opacity}>
+        {/* A tiny offset base gives depth without an SVG filter. */}
+        <circle cx={x + r * 0.035} cy={y + r * 0.08} r={r} fill="#000" opacity={dark ? 0.3 : 0.18} />
+        <circle cx={x} cy={y} r={r} fill={edge} />
+        <circle cx={x} cy={y - r * 0.025} r={r * 0.94} fill={body} />
+        {/* The lighter upper disc and shared sheen keep the water-drop look. */}
+        <circle cx={x - r * 0.07} cy={y - r * 0.11} r={r * 0.72} fill={crown} opacity={dark ? 0.42 : 0.7} />
+        <Sheen x={x} y={y} r={r} dark={dark} />
+      </g>
+    );
+  }
+
   return (
     <g className={className} opacity={opacity}>
       <circle cx={x} cy={y} r={r} fill={dark ? "url(#ink)" : "url(#milk)"} stroke={dark ? "none" : "rgb(0 0 0 / 0.12)"} strokeWidth={0.015} />
@@ -77,13 +102,13 @@ export function Bead({
   );
 }
 
-/** Thin ring on the last move plus a one-shot ripple (re-keyed by `k`). */
-export function LastMark({ x, y, r = 0.51, dark, k }: { x: number; y: number; r?: number; dark: boolean; k: number | string }) {
+/** Thin ring on the last move plus an optional one-shot ripple (re-keyed by `k`). */
+export function LastMark({ x, y, r = 0.51, dark, k, ripple = true }: { x: number; y: number; r?: number; dark: boolean; k: number | string; ripple?: boolean }) {
   const stroke = dark ? "#0b0b0b" : "#8f8f8b";
   return (
     <g pointerEvents="none">
       <circle cx={x} cy={y} r={r} fill="none" stroke={stroke} strokeWidth={0.03} opacity={0.5} />
-      <circle key={k} className="ripple" cx={x} cy={y} r={r} fill="none" stroke={stroke} strokeWidth={0.03} />
+      {ripple && <circle key={k} className="ripple" cx={x} cy={y} r={r} fill="none" stroke={stroke} strokeWidth={0.03} />}
     </g>
   );
 }
